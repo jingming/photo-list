@@ -13,15 +13,11 @@ app = Flask(__name__)
 
 @app.route('/photos', methods=['GET'])
 def list_photos():
-    pics = []
-
-    messages = twilio.messages.list(to=PHONE_NUMBER)
-    for message in messages:
-        if message.sid.startswith('MM'):
-            media = message.media.list()
-            pics.extend(['https://api.twilio.com{}'.format(m.uri.replace('.json', '')) for m in media])
-
-    return json.dumps(pics), 200
+    return json.dumps([
+        'https://api.twilio.com{}'.format(media.uri.replace('.json', '')) 
+        for message in twilio.messages.list(to=PHONE_NUMBER) if message.sid.startswith('MM') 
+        for media in message.media.list()
+    ]), 200
 
 
 if __name__ == '__main__':
